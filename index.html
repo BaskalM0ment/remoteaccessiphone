@@ -1,73 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>iPhone Shortcut Remote</title>
+  <title>iPhone Remote Control</title>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100vh;padding:28px;background:#0b1220;color:#f7fbff}
-    h1{margin:8px 0 18px;font-size:20px}
-    p.tip{opacity:.8;max-width:540px;text-align:center}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(140px,1fr));gap:12px;margin-top:20px;width:100%;max-width:540px}
-    button, a.cmd{appearance:none;border:0;padding:14px 12px;border-radius:12px;background:#1b2430;color:#fff;font-weight:600;font-size:15px;text-align:center;text-decoration:none;display:inline-block}
-    .muted{background:transparent;border:1px solid rgba(255,255,255,.06);color:#bcd}
-    footer{margin-top:22px;font-size:13px;color:#bcd;opacity:.9;text-align:center}
-    code{background:rgba(255,255,255,.04);padding:4px 6px;border-radius:6px}
+    body { background: #000; color: #fff; font-family: Arial; padding: 40px; }
+    button { padding: 15px 25px; margin: 10px; font-size: 20px; }
   </style>
 </head>
 <body>
-  <h1>iPhone Shortcut Remote</h1>
-  <p class="tip">
-    This page sends commands to a Shortcut named <code>RemoteControl</code> using the URL scheme.
-    <strong>Open this page on your iPhone</strong> and tap a button. (It will open the Shortcuts app.)
-  </p>
+  <h1>Remote Control for iPhone</h1>
 
-  <div class="grid">
-    <button onclick="runShortcut('vibrate')">Vibrate</button>
-    <button onclick="runShortcut('notify:Hello from web')">Show notification</button>
-    <button onclick="runShortcut('speak:Hello — this is your phone')">Speak text</button>
-    <button onclick="runShortcut('open:twitter://')">Open app (Twitter)</button>
-    <button onclick="runShortcut('location')">Get location</button>
-    <button onclick="runShortcut('battery')">Get battery level</button>
-  </div>
-
-  <p style="margin-top:18px;max-width:540px;text-align:center;color:#bcd">
-    If a shortcut named <code>RemoteControl</code> exists, Shortcuts will open and receive the text after <code>&amp;input=</code>.
-    Example input sent: <code>vibrate</code> or <code>notify:Hello</code>.
-  </p>
-
-  <footer>
-    <div style="margin-bottom:6px">Shortcut URL shown for debugging:</div>
-    <div id="urlbox" style="word-break:break-all;max-width:90%"></div>
-  </footer>
+  <button onclick="send('vibrate')">Vibrate</button>
+  <button onclick="send('speak')">Speak</button>
+  <button onclick="send('alarm')">Alarm Sound</button>
 
   <script>
-    // Name of the shortcut to call. Change if you named it differently.
-    const SHORTCUT_NAME = "RemoteControl";
-
-    // Build the shortcut URL and attempt to open it.
-    function runShortcut(inputText) {
-      // encode the input for use in a URL
-      const encoded = encodeURIComponent(inputText);
-      const url = `shortcuts://run-shortcut?name=${encodeURIComponent(SHORTCUT_NAME)}&input=${encoded}`;
-
-      // show URL to user for debug/copy
-      document.getElementById('urlbox').innerText = url;
-
-      // Approach: use window.location to open the url (works in Safari on iPhone)
-      // We also create a temporary link and call click() as a fallback.
-      try {
-        // first try a programmatic navigation
-        window.location.href = url;
-      } catch (e) {
-        // fallback: create and click an anchor
-        const a = document.createElement('a');
-        a.href = url;
-        a.className = 'cmd';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(()=>a.remove(), 1000);
-      }
+    function send(cmd) {
+      fetch("http://localhost:9000/send", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ command: cmd })
+      }).then(r => r.text()).then(alert);
     }
   </script>
 </body>
